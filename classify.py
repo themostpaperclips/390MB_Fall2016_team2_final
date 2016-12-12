@@ -18,8 +18,8 @@ import json
 import threading
 import numpy as np
 import pickle
-from features import extract_features # make sure features.py is in the same directory
-from util import reorient, reset_vars
+from extract_features import extract_features # make sure features.py is in the same directory
+from window import Window
 
 # TODO: Replace the string with your user ID
 user_id = "be.af.9a.d0.e9.3f.e3.db.8f.94"
@@ -62,9 +62,12 @@ def predict(window):
 
     # TODO: Predict class label
 
-    label = classifier.predict(extract_features(window))
-    print label[0]
-    onActivityDetected(label[0])
+    if (window.allCheck()):
+        label = classifier.predict(extract_features(window))
+        print label[0]
+        onActivityDetected(label[0])
+    else:
+        print 'Too little light'
 
 
 
@@ -131,10 +134,8 @@ try:
 
     previous_json = ''
 
-    sensor_data = []
-    window_size = 25 # ~1 sec assuming 25 Hz sampling rate
-    step_size = 25 # no overlap
-    index = 0 # to keep track of how many samples we have buffered so far
+    window_size = 1000
+    window = Window(window_size)
 
     while True:
         try:
@@ -148,23 +149,10 @@ try:
                     previous_json = json_string
                     continue
                 previous_json = '' # reset if all were successful
-                sensor_type = data['sensor_type']
-                if (sensor_type == u"SENSOR_ACCEL"):
-                    t=data['data']['t']
-                    x=data['data']['x']
-                    y=data['data']['y']
-                    z=data['data']['z']
-
-                    sensor_data.append(x,y,z)
-                    index+=1
-                    # make sure we have exactly window_size data points :
-                    while len(sensor_data) > window_size:
-                        sensor_data.pop(0)
-
-                    if (index >= step_size and len(sensor_data) == window_size):
-                        t = threading.Thread(target=predict, args=(np.asarray(sensor_data[:]),))
-                        t.start()
-                        index = 0
+                if(not window.push_point(data)):
+                    t = threading.Thread(target=predict, args=(window,))
+                    t.start()
+                    index = window = Window(window_size)
 
             sys.stdout.flush()
         except KeyboardInterrupt:
