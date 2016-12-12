@@ -4,7 +4,7 @@ import sys
 class Window:
     def __init__(self, size):
         self.data = {'magnetometer': [], 'barometer': [], 'light': []}
-        self.size = 1000
+        self.size = size
         self.start = None
 
     def push_point(self, data):
@@ -30,7 +30,7 @@ class Window:
             return True
 
     def push_slices(self, data):
-        if (self.data != {'magnetometer': [], 'barometer': [], 'light': []}):
+        if (self.data != {'magnetometer': [], 'barometer': [], 'light': []} or len(data['magnetometer']) == 0):
             return False
         else:
             def sizeIndex(ls, start, size):
@@ -38,8 +38,7 @@ class Window:
                 while(i < len(ls) and ls[i,0] - start < size):
                     i += 1
                 return i
-            starts = [data['magnetometer'], data['barometer'], data['light']]
-            self.start = min(map(lambda x: x[0,0] if len(x) > 0 else float("inf"), starts))
+            self.start = data['magnetometer'][0,0]
             magIndex = sizeIndex(data['magnetometer'], self.start, self.size)
             barIndex = sizeIndex(data['barometer'], self.start, self.size)
             lightIndex = sizeIndex(data['light'], self.start, self.size)

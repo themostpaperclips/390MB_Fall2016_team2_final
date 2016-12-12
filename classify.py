@@ -48,6 +48,7 @@ def onActivityDetected(activity):
     """
     Notifies the client of the current activity
     """
+    print activity
     send_socket.send(json.dumps({'user_id' : user_id, 'sensor_type' : 'SENSOR_SERVER_MESSAGE', 'message' : 'IN_OR_OUT_DETECTED', 'data': {'activity' : activity}}) + "\n")
 
 def predict(window):
@@ -64,7 +65,6 @@ def predict(window):
 
     if (window.allCheck()):
         label = classifier.predict(extract_features(window))
-        print label[0]
         onActivityDetected(label[0])
     else:
         print 'Too little light'
@@ -134,7 +134,7 @@ try:
 
     previous_json = ''
 
-    window_size = 1000
+    window_size = 2000
     window = Window(window_size)
 
     while True:

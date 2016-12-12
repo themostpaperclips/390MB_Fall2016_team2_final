@@ -36,7 +36,7 @@ sys.stdout.flush()
 #
 # -----------------------------------------------------------------------------
 
-window_size = 1000
+window_size = 2000
 
 print("Extracting features and labels for window size {}".format(window_size))
 sys.stdout.flush()
@@ -48,18 +48,22 @@ n_features = 24
 X = np.zeros((0,n_features))
 y = np.zeros(0,)
 
+total = 0
+
 while(sum(map(lambda x: len(x), data.values())) != 0):
 
     window = Window(window_size)
 
     data = window.push_slices(data)
-
     if (window.allCheck()):
 
         X = np.append(X, np.transpose(extract_features(window).reshape(-1, 1)), axis=0)
         # append label:
         y = np.append(y, [extract_labels(window)])
+    else:
+        total += 1
 
+print total
 print("Finished feature extraction over {} windows".format(len(X)))
 print("Unique labels found: {}".format(set(y)))
 sys.stdout.flush()
