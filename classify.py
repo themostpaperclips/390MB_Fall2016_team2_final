@@ -48,7 +48,7 @@ def onActivityDetected(activity):
     """
     Notifies the client of the current activity
     """
-    send_socket.send(json.dumps({'user_id' : user_id, 'sensor_type' : 'SENSOR_SERVER_MESSAGE', 'message' : 'ACTIVITY_DETECTED', 'data': {'activity' : activity}}) + "\n")
+    send_socket.send(json.dumps({'user_id' : user_id, 'sensor_type' : 'SENSOR_SERVER_MESSAGE', 'message' : 'IN_OR_OUT_DETECTED', 'data': {'activity' : activity}}) + "\n")
 
 def predict(window):
     """
