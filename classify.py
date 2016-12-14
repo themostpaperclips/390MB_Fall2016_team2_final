@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep  7 15:34:11 2016
-
-Assignment A0 : Data Collection
-
-@author: cs390mb
-
-This Python script receives incoming unlabelled accelerometer data through
-the server and uses your trained classifier to predict its class label.
-The label is then sent back to the Android application via the server.
-
-"""
-
 import socket
 import sys
 import json
@@ -21,7 +7,6 @@ import pickle
 from extract_features import extract_features # make sure features.py is in the same directory
 from window import Window
 
-# TODO: Replace the string with your user ID
 user_id = "be.af.9a.d0.e9.3f.e3.db.8f.94"
 
 count = 0

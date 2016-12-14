@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import division
 
 import os
@@ -18,54 +17,38 @@ from sklearn.tree import DecisionTreeClassifier
 #
 # -----------------------------------------------------------------------------
 
-print("Loading data...")
+print("Loading data, windowing data, and extracting features...")
 sys.stdout.flush()
-magnetometer_file = os.path.join('data', 'magnetometer_data.csv')
-magnetometerData = np.genfromtxt(magnetometer_file, delimiter=',')
-barometer_file = os.path.join('data', 'barometer_data.csv')
-barometerData = np.genfromtxt(barometer_file, delimiter=',')
-light_file = os.path.join('data', 'light_data.csv')
-lightData = np.genfromtxt(light_file, delimiter=',')
-data = {'magnetometer': magnetometerData, 'barometer': barometerData, 'light': lightData}
-print("Loaded data")
-sys.stdout.flush()
-
-# %%---------------------------------------------------------------------------
-#
-#		                Extract Features & Labels
-#
-# -----------------------------------------------------------------------------
 
 window_size = 2000
-
-print("Extracting features and labels for window size {}".format(window_size))
-sys.stdout.flush()
-
-
-# TODO make it so this isn't manual
 n_features = 24
 
 X = np.zeros((0,n_features))
 y = np.zeros(0,)
 
-total = 0
+rejected = 0
 
-while(sum(map(lambda x: len(x), data.values())) != 0):
+for dirname in os.listdir('data'):
+    magnetometerData = np.genfromtxt(os.path.join('data', dirname,'magnetometer_data.csv'), delimiter=',')
+    barometerData = np.genfromtxt(os.path.join('data', dirname, 'barometer_data.csv'), delimiter=',')
+    lightData = np.genfromtxt(os.path.join('data', dirname,'light_data.csv'), delimiter=',')
+    data = {'magnetometer': magnetometerData, 'barometer': barometerData, 'light': lightData}
 
-    window = Window(window_size)
+    while data:
 
-    data = window.push_slices(data)
-    if (window.allCheck()):
+        window = Window(window_size)
 
-        X = np.append(X, np.transpose(extract_features(window).reshape(-1, 1)), axis=0)
-        # append label:
-        y = np.append(y, [extract_labels(window)])
-    else:
-        total += 1
+        data = window.push_slices(data)
+        if (window.allCheck()):
 
-print total
-print("Finished feature extraction over {} windows".format(len(X)))
-print("Unique labels found: {}".format(set(y)))
+            X = np.append(X, np.transpose(extract_features(window).reshape(-1, 1)), axis=0)
+            # append label:
+            y = np.append(y, [extract_labels(window)])
+        else:
+            rejected += 1
+print("Rejected {} windows".format(rejected))
+print("Loaded data and extracted features over {} windows".format(len(X)))
+print("Unique labels found: {}".format(list(set(y))))
 sys.stdout.flush()
 
 # %%---------------------------------------------------------------------------
@@ -73,6 +56,8 @@ sys.stdout.flush()
 #		                Train & Evaluate Classifier
 #
 # -----------------------------------------------------------------------------
+
+print("Training with 10-fold Cross Validation...")
 
 class_names = ['indoors', 'outdoors']
 
@@ -111,7 +96,5 @@ print np.nanmean(precisionList, axis=0)
 print "average recall:"
 print np.nanmean(recallList, axis=0)
 
-# when ready, set this to the best model you found, trained on all the data:
-best_classifier = clf
-with open('classifier.pickle', 'wb') as f: # 'wb' stands for 'write bytes'
-    pickle.dump(best_classifier, f)
+with open('classifier.pickle', 'wb') as f:
+    pickle.dump(clf, f)

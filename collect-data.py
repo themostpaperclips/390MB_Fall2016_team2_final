@@ -1,22 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep  7 15:34:11 2016
-
-Assignment A0 : Data Collection
-
-@author: cs390mb
-
-This Python script receives incoming labelled accelerometer data through
-the server and saves it in .csv format to disk.
-
-"""
-
 import socket
 import sys
 import json
 import numpy as np
 
-# TODO: Replace the string with your user ID
 user_id = "be.af.9a.d0.e9.3f.e3.db.8f.94"
 
 count = 0
