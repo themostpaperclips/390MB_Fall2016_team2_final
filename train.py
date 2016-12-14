@@ -46,7 +46,7 @@ for dirname in os.listdir('data'):
             y = np.append(y, [extract_labels(window)])
         else:
             rejected += 1
-print("Rejected {} windows".format(rejected))
+print("Rejected {} windows, {} percent of windows".format(rejected, (rejected / (rejected + len(X))) * 100))
 print("Loaded data and extracted features over {} windows".format(len(X)))
 print("Unique labels found: {}".format(list(set(y))))
 sys.stdout.flush()
