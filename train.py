@@ -11,12 +11,6 @@ import pickle
 
 from sklearn.tree import DecisionTreeClassifier
 
-# %%---------------------------------------------------------------------------
-#
-#		                 Load Data From Disk
-#
-# -----------------------------------------------------------------------------
-
 print("Loading data, windowing data, and extracting features...")
 sys.stdout.flush()
 
@@ -28,21 +22,33 @@ y = np.zeros(0,)
 
 rejected = 0
 
+# For each of the directories in the data directory
 for dirname in os.listdir('data'):
+
+    # Extract each of the data sets
     magnetometerData = np.genfromtxt(os.path.join('data', dirname,'magnetometer_data.csv'), delimiter=',')
     barometerData = np.genfromtxt(os.path.join('data', dirname, 'barometer_data.csv'), delimiter=',')
     lightData = np.genfromtxt(os.path.join('data', dirname,'light_data.csv'), delimiter=',')
+
+    # Combine the data into a dictionary
     data = {'magnetometer': magnetometerData, 'barometer': barometerData, 'light': lightData}
 
+    # The data will equal false when extraction is done
     while data:
 
+        # Create a window
         window = Window(window_size)
 
+        # Update data so it doesn't have the data in the window
         data = window.push_slices(data)
+
+        # If the window has enough data
         if (window.allCheck()):
 
+            # Append the window features to X
             X = np.append(X, np.transpose(extract_features(window).reshape(-1, 1)), axis=0)
-            # append label:
+
+            # Append the window label to y
             y = np.append(y, [extract_labels(window)])
         else:
             rejected += 1
@@ -51,12 +57,6 @@ print("Loaded data and extracted features over {} windows".format(len(X)))
 print("Unique labels found: {}".format(list(set(y))))
 sys.stdout.flush()
 
-# %%---------------------------------------------------------------------------
-#
-#		                Train & Evaluate Classifier
-#
-# -----------------------------------------------------------------------------
-
 print("Training with 10-fold Cross Validation...")
 
 class_names = ['indoors', 'outdoors']
@@ -64,6 +64,7 @@ class_names = ['indoors', 'outdoors']
 n = len(y)
 n_classes = len(class_names)
 
+# Create the decision tree classifier
 clf = DecisionTreeClassifier(max_depth=3, max_features=5)
 
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
@@ -72,6 +73,7 @@ accuracyList = []
 precisionList = []
 recallList = []
 
+# Train the classifier
 for i, (train_indexes, test_indexes) in enumerate(cv):
     print("Fold {}".format(i))
 
@@ -96,5 +98,6 @@ print np.nanmean(precisionList, axis=0)
 print "average recall:"
 print np.nanmean(recallList, axis=0)
 
+# Save the classifier to disk
 with open('classifier.pickle', 'wb') as f:
     pickle.dump(clf, f)

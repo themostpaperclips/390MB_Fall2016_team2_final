@@ -96,6 +96,8 @@ try:
                     continue
                 previous_json = '' # reset if all were successful
                 sensor_type = data['sensor_type']
+
+                # Find the sensor type and add the data to the appropriate list
                 if (sensor_type == u"SENSOR_MAGNETOMETER"):
                     print("Received Magnetometer data")
                     t = data['data']['t']
@@ -133,6 +135,8 @@ try:
 except KeyboardInterrupt:
     # occurs when the user presses Ctrl-C
     print("User Interrupt. Saving labelled data...")
+
+    # Append the data to the data files
     magnetometer_data = np.asarray(magnetometer_data)
     magFile = open('data/magnetometer_data.csv','ab')
     np.savetxt(magFile, magnetometer_data, delimiter=",")

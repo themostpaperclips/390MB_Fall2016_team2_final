@@ -3,11 +3,20 @@ import sys
 
 class Window:
     def __init__(self, size):
+
+        # The data itself
         self.data = {'magnetometer': [], 'barometer': [], 'light': []}
+
+        # The window size, in milliseconds
         self.size = size
+
+        # The first data point
         self.start = None
 
     def push_point(self, data):
+        """
+        Add a point to the window and return false if window is full
+        """
         sensor_type = data['sensor_type']
         time = data['data']['t']
         if (self.start == None):
@@ -30,6 +39,10 @@ class Window:
             return True
 
     def push_slices(self, data):
+        """
+        Add a slice to the window and return false if the window is full
+        Return the data without the slice
+        """
         if (self.data != {'magnetometer': [], 'barometer': [], 'light': []} or len(data['magnetometer']) == 0):
             return False
         else:
@@ -48,4 +61,7 @@ class Window:
             return {'magnetometer': data['magnetometer'][magIndex:], 'barometer': data['barometer'][barIndex:], 'light': data['light'][lightIndex:]}
 
     def allCheck(self):
+        """
+        Check if there is enough data
+        """
         return 2 <= min([len(self.data['magnetometer']), len(self.data['barometer']), len(self.data['light'])])

@@ -4,7 +4,7 @@ import json
 import threading
 import numpy as np
 import pickle
-from extract_features import extract_features # make sure features.py is in the same directory
+from extract_features import extract_features
 from window import Window
 
 user_id = "be.af.9a.d0.e9.3f.e3.db.8f.94"
@@ -21,7 +21,6 @@ send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 send_socket.connect(("none.cs.umass.edu", 9999))
 
 # Load the classifier:
-
 with open('classifier.pickle', 'rb') as f:
     classifier = pickle.load(f)
 
@@ -34,6 +33,8 @@ def onActivityDetected(activity):
     Notifies the client of the current activity
     """
     print activity
+
+    # Send the label in JSON
     send_socket.send(json.dumps({'user_id' : user_id, 'sensor_type' : 'SENSOR_SERVER_MESSAGE', 'message' : 'IN_OR_OUT_DETECTED', 'data': {'activity' : activity}}) + "\n")
 
 def predict(window):
@@ -46,10 +47,12 @@ def predict(window):
 
     print("Buffer filled. Run your classifier.")
 
-    # TODO: Predict class label
-
+    # Check if the window has enough data to extract features
     if (window.allCheck()):
+        # Predict the label
         label = classifier.predict(extract_features(window))
+
+        # Send the label
         onActivityDetected(label[0])
     else:
         print 'Too little light'
@@ -134,10 +137,15 @@ try:
                     previous_json = json_string
                     continue
                 previous_json = '' # reset if all were successful
+
+                # Check if the current window is full
                 if(not window.push_point(data)):
+                    # Predict on the full window
                     t = threading.Thread(target=predict, args=(window,))
                     t.start()
-                    index = window = Window(window_size)
+
+                    # Create a new window and set it a the current window
+                    window = Window(window_size)
 
             sys.stdout.flush()
         except KeyboardInterrupt:

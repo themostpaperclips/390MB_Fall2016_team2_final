@@ -39,6 +39,9 @@ def extract_features(win):
     return x
 
 def extract_labels(win):
+    """
+    Extract labels by taking the mode from the window
+    """
     mag = np.array(win.data['magnetometer'])[:, 4]
     bar = np.array(win.data['barometer'])[:, 2]
     light = np.array(win.data['light'])[:, 2]
